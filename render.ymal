@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: hcc-tool
+    runtime: python
+    buildCommand: apt-get install -y mafft && pip install -r requirements.txt
+    startCommand: gunicorn app:app
