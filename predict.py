@@ -7,7 +7,7 @@ import pandas as pd
 import requests
 import io
 
-MAFFT_PATH = r"D:\mafft\mafft-win\mafft.bat"
+MAFFT_PATH = "mafft"
 REFERENCE_ID = "AB033559.1"
 
 def get_reference():
