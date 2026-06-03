@@ -1,5 +1,4 @@
-
-      from Bio import SeqIO
+from Bio import SeqIO
 from Bio.Align import PairwiseAligner
 import pickle
 import pandas as pd
