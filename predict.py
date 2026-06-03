@@ -1,19 +1,14 @@
-from Bio import SeqIO
-import subprocess
-import tempfile
-import os
+
+      from Bio import SeqIO
+from Bio.Align import PairwiseAligner
 import pickle
 import pandas as pd
-import requests
 import io
 
-MAFFT_PATH = "mafft"
-REFERENCE_ID = "AB033559.1"
-
 def get_reference():
-    url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nucleotide&id={REFERENCE_ID}&rettype=fasta&retmode=text"
-    response = requests.get(url)
-    record = SeqIO.read(io.StringIO(response.text), "fasta")
+    with open("ref sequence.fasta", "r") as f:
+        content = f.read()
+    record = SeqIO.read(io.StringIO(content), "fasta")
     return str(record.seq).upper()
 
 def clean_sequence(raw):
@@ -24,43 +19,20 @@ def clean_sequence(raw):
             cleaned.append(line.strip())
     return ''.join(cleaned).upper()
 
-def align_with_mafft(query_sequence, reference_sequence):
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.fasta', delete=False) as f:
-        f.write(f">reference\n{reference_sequence}\n")
-        f.write(f">query\n{query_sequence}\n")
-        input_file = f.name
+def align_sequences(query, reference):
+    aligner = PairwiseAligner()
+    aligner.mode = 'global'
+    aligner.match_score = 2
+    aligner.mismatch_score = -1
+    aligner.open_gap_score = -10
+    aligner.extend_gap_score = -0.5
+    alignments = aligner.align(reference, query)
+    return next(iter(alignments))
 
-    try:
-        result = subprocess.run(
-            [MAFFT_PATH, '--quiet', '--auto', input_file],
-            capture_output=True,
-            text=True,
-            timeout=120
-        )
-        aligned_text = result.stdout
-
-        if not aligned_text.strip():
-            raise Exception("MAFFT returned empty output. Please check your sequence.")
-
-        sequences = {}
-        current_name = None
-        current_seq = []
-        for line in aligned_text.splitlines():
-            if line.startswith('>'):
-                if current_name:
-                    sequences[current_name] = ''.join(current_seq)
-                current_name = line[1:].strip()
-                current_seq = []
-            else:
-                current_seq.append(line.strip())
-        if current_name:
-            sequences[current_name] = ''.join(current_seq)
-
-        return sequences
-
-    finally:
-        if os.path.exists(input_file):
-            os.remove(input_file)
+def get_aligned_sequences(alignment):
+    ref_aligned = str(alignment[0])
+    query_aligned = str(alignment[1])
+    return ref_aligned, query_aligned
 
 def get_base_at(query_aligned, ref_to_align, pos):
     if pos not in ref_to_align:
@@ -83,19 +55,9 @@ def extract_features(query_sequence):
     if len(clean_query) < 100:
         raise Exception("Sequence is too short. Please paste a complete HBV genome sequence.")
 
-    print("Aligning with MAFFT... please wait")
-    sequences = align_with_mafft(clean_query, reference)
-
-    ref_aligned = None
-    query_aligned = None
-    for name, seq in sequences.items():
-        if 'reference' in name.lower():
-            ref_aligned = seq.upper()
-        else:
-            query_aligned = seq.upper()
-
-    if ref_aligned is None or query_aligned is None:
-        raise Exception("Alignment failed. Could not identify reference and query sequences.")
+    print("Aligning sequences... please wait")
+    alignment = align_sequences(clean_query, reference)
+    ref_aligned, query_aligned = get_aligned_sequences(alignment)
 
     ref_pos = 0
     ref_to_align = {}
