@@ -16,12 +16,13 @@ def predict():
             error="Sequence is too short. Please paste a complete HBV genome sequence.")
 
     try:
-        result, confidence, model_features, additional_features = predict_hcc_risk(sequence)
+        result, confidence, model_features, additional_features, genotype = predict_hcc_risk(sequence)
         return render_template('index.html',
             result=result,
             confidence=confidence,
             model_features=model_features,
-            additional_features=additional_features)
+            additional_features=additional_features,
+            genotype=genotype)
     except Exception as e:
         return render_template('index.html',
             error=f"An error occurred: {str(e)}")
