@@ -44,6 +44,91 @@ def get_base_at(query_aligned, ref_to_align, pos):
         return None
     return base
 
+def detect_genotype(query_aligned, ref_to_align):
+    # Genotype signature positions based on Kramvis et al. and Norder et al.
+    # Each genotype gets a score based on matching signature bases
+    scores = {'A': 0, 'B': 0, 'C': 0, 'D': 0, 'F': 0}
+
+    # Position 1858: C=Genotype B, T=Genotype C/D/A/F
+    base_1858 = get_base_at(query_aligned, ref_to_align, 1858)
+    if base_1858 == 'C':
+        scores['B'] += 3
+    elif base_1858 == 'T':
+        scores['C'] += 2
+        scores['D'] += 2
+        scores['A'] += 2
+        scores['F'] += 2
+
+    # Position 2507: T=Genotype B/C, A=Genotype A/D/F
+    base_2507 = get_base_at(query_aligned, ref_to_align, 2507)
+    if base_2507 == 'T':
+        scores['B'] += 2
+        scores['C'] += 2
+    elif base_2507 == 'A':
+        scores['A'] += 2
+        scores['D'] += 2
+        scores['F'] += 2
+
+    # Position 2579: G=Genotype B/C/D, A=Genotype A/F
+    base_2579 = get_base_at(query_aligned, ref_to_align, 2579)
+    if base_2579 == 'G':
+        scores['B'] += 1
+        scores['C'] += 1
+        scores['D'] += 1
+    elif base_2579 == 'A':
+        scores['A'] += 2
+        scores['F'] += 2
+
+    # Position 2762: G=most genotypes, distinguish by combination
+    base_2762 = get_base_at(query_aligned, ref_to_align, 2762)
+    if base_2762 == 'G':
+        scores['A'] += 1
+        scores['B'] += 1
+        scores['C'] += 1
+        scores['D'] += 1
+
+    # Position 3055: A=Genotype F signature
+    base_3055 = get_base_at(query_aligned, ref_to_align, 3055)
+    if base_3055 == 'A':
+        scores['F'] += 3
+    elif base_3055 == 'G':
+        scores['A'] += 1
+        scores['B'] += 1
+        scores['C'] += 1
+        scores['D'] += 1
+
+    # Position 621: used to distinguish A from D
+    base_621 = get_base_at(query_aligned, ref_to_align, 621)
+    if base_621 == 'T':
+        scores['D'] += 2
+    elif base_621 == 'G':
+        scores['A'] += 2
+        scores['C'] += 1
+
+    # Position 513: used to distinguish genotypes
+    base_513 = get_base_at(query_aligned, ref_to_align, 513)
+    if base_513 == 'A':
+        scores['A'] += 2
+        scores['F'] += 1
+    elif base_513 == 'C':
+        scores['B'] += 1
+        scores['C'] += 1
+        scores['D'] += 1
+
+    # Find best scoring genotype
+    best_genotype = max(scores, key=scores.get)
+    best_score = scores[best_genotype]
+
+    if best_score == 0:
+        return 'Unknown'
+
+    # Check if it is a clear winner or ambiguous
+    sorted_scores = sorted(scores.values(), reverse=True)
+    if sorted_scores[0] == sorted_scores[1]:
+        return 'Ambiguous'
+
+    return best_genotype
+
 def extract_features(query_sequence):
     print("Fetching reference sequence...")
     reference = get_reference()
@@ -64,6 +149,9 @@ def extract_features(query_sequence):
         if base != '-':
             ref_pos += 1
             ref_to_align[ref_pos] = i
+
+    # Detect genotype
+    genotype = detect_genotype(query_aligned, ref_to_align)
 
     # --- Model features (used for prediction) ---
     model_features = {}
@@ -102,7 +190,7 @@ def extract_features(query_sequence):
     else:
         model_features['PreS2'] = 0
 
-    # --- Additional informational features (not used in model) ---
+    # --- Additional informational features ---
     additional_features = {}
 
     base = get_base_at(query_aligned, ref_to_align, 1613)
@@ -114,12 +202,13 @@ def extract_features(query_sequence):
     base = get_base_at(query_aligned, ref_to_align, 1768)
     additional_features['T1768A'] = 1 if base == 'A' else 0
 
-    return model_features, additional_features
+    return model_features, additional_features, genotype
 
 def predict_hcc_risk(sequence):
-    model_features, additional_features = extract_features(sequence)
+    model_features, additional_features, genotype = extract_features(sequence)
     print("Model mutations detected:", model_features)
     print("Additional mutations detected:", additional_features)
+    print("Genotype detected:", genotype)
 
     model = pickle.load(open('hcc_new model.pkl', 'rb'))
 
@@ -135,4 +224,5 @@ def predict_hcc_risk(sequence):
         result = "LOW RISK — No significant HCC associated mutations detected"
 
     confidence = round(max(probability) * 100, 2)
-    return result, confidence, model_features, additional_features
+    return result, confidence, model_features, additional_features, genotype
+   
