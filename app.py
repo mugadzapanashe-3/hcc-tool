@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect, url_for
 from predict import predict_hcc_risk
 
 app = Flask(__name__)
@@ -7,8 +7,12 @@ app = Flask(__name__)
 def home():
     return render_template('index.html')
 
-@app.route('/predict', methods=['POST'])
+@app.route('/predict', methods=['GET', 'POST'])
 def predict():
+    # If someone visits /predict directly redirect them to home page
+    if request.method == 'GET':
+        return redirect(url_for('home'))
+
     sequence = request.form['sequence']
 
     if len(sequence.strip()) < 100:
