@@ -5,124 +5,364 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HBV-HCC Early Detection Tool</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; min-height: 100vh; padding: 40px 20px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .header { background: #1a3c5e; color: white; padding: 30px; border-radius: 12px 12px 0 0; text-align: center; }
-        .header h1 { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
-        .header p { font-size: 14px; opacity: 0.85; }
-        .card { background: white; padding: 30px; border-radius: 0 0 12px 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        label { display: block; font-size: 14px; font-weight: 600; color: #2d3748; margin-bottom: 8px; }
-        textarea { width: 100%; height: 180px; padding: 14px; border: 1.5px solid #cbd5e0; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d3748; resize: vertical; outline: none; transition: border-color 0.2s; }
-        textarea:focus { border-color: #1a3c5e; }
-        .hint { font-size: 12px; color: #718096; margin-top: 6px; margin-bottom: 20px; }
-        button { width: 100%; padding: 14px; background: #1a3c5e; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-        button:hover { background: #2a5a8e; }
-        .loading { display: none; text-align: center; padding: 20px; color: #718096; font-size: 14px; }
-        .result-box { margin-top: 24px; padding: 20px; border-radius: 8px; text-align: center; }
-        .high-risk { background: #fff5f5; border: 1.5px solid #fc8181; }
-        .low-risk { background: #f0fff4; border: 1.5px solid #68d391; }
-        .result-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
-        .high-risk .result-title { color: #c53030; }
-        .low-risk .result-title { color: #276749; }
-        .confidence { font-size: 13px; color: #718096; margin-bottom: 12px; }
-        .accuracy-note { font-size: 11px; color: #a0aec0; }
-        .genotype-badge { display: inline-block; background: #1a3c5e; color: white; padding: 6px 18px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 16px; }
-        .genotype-label { font-size: 12px; color: #718096; margin-bottom: 4px; }
-        .mutations-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; text-align: left; }
-        .mutations-table th { background: #edf2f7; padding: 10px 14px; font-weight: 600; color: #2d3748; border-bottom: 1.5px solid #cbd5e0; }
-        .mutations-table td { padding: 10px 14px; border-bottom: 1px solid #e2e8f0; color: #4a5568; }
-        .section-row td { background: #edf2f7; font-weight: 600; color: #2d3748; padding: 8px 14px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .present { color: #c53030; font-weight: 600; }
-        .absent { color: #276749; }
-        .region-label { color: #718096; font-size: 12px; }
-        .error-box { margin-top: 24px; padding: 16px; background: #fff5f5; border: 1.5px solid #fc8181; border-radius: 8px; color: #c53030; font-size: 14px; }
-        .disclaimer { margin-top: 20px; font-size: 11px; color: #a0aec0; text-align: center; line-height: 1.6; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .input-section {
+            margin-bottom: 30px;
+        }
+        
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .example-box {
+            background-color: #f0f4ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 12px;
+            color: #555;
+        }
+        
+        .example-box code {
+            background-color: #e0e7ff;
+            padding: 2px 5px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 11px;
+            display: block;
+            margin-top: 5px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        /* Error message */
+        .error-message {
+            background-color: #ffebee;
+            border-left: 4px solid #f44336;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .error-message p {
+            color: #c62828;
+            margin: 0;
+        }
+        
+        /* Results section */
+        .results-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 10px;
+        }
+        
+        .risk-badge {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .risk-high {
+            background-color: #f44336;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        
+        .risk-low {
+            background-color: #4caf50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        
+        .confidence {
+            margin-top: 10px;
+        }
+        
+        .genotype-badge {
+            display: inline-block;
+            background-color: #2196f3;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 10px;
+        }
+        
+        h3 {
+            margin: 20px 0 10px 0;
+            color: #333;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        
+        th {
+            background-color: #2196f3;
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .status-present {
+            color: #f44336;
+            font-weight: bold;
+        }
+        
+        .status-absent {
+            color: #4caf50;
+        }
+        
+        .synergy-box {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #fff3e0;
+            border-left: 4px solid #ff9800;
+            border-radius: 5px;
+        }
+        
+        .synergy-box h3 {
+            color: #e65100;
+            margin-top: 0;
+        }
+        
+        .synergy-effect {
+            color: #e65100;
+            font-weight: bold;
+        }
+        
+        .footer {
+            background-color: #f8f9fa;
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            border-top: 1px solid #ddd;
+        }
+        
+        .note {
+            font-size: 12px;
+            color: #777;
+            margin-top: 10px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>HBV-HCC Early Detection Tool</h1>
-            <p>Paste a Hepatitis B virus genome sequence to assess Hepatocellular Carcinoma risk</p>
+            <h1>🔬 HBV-HCC Early Detection Tool</h1>
+            <p>Hepatitis B Virus Mutation Analysis for Hepatocellular Carcinoma Risk Prediction</p>
+            <p style="font-size: 12px; margin-top: 10px;">Model Accuracy: 73% | Precision: 80%</p>
         </div>
-        <div class="card">
-            <form method="POST" action="/predict" onsubmit="showLoading()">
-                <label for="sequence">HBV Nucleotide Sequence</label>
-                <textarea id="sequence" name="sequence" placeholder="Paste your HBV sequence here (FASTA format or raw nucleotides)..."></textarea>
-                <p class="hint">Accepts raw sequence or FASTA format. Complete genome sequences give the most accurate results.</p>
-                <button type="submit">Analyse Sequence</button>
-            </form>
-            <div class="loading" id="loading">
-                Aligning sequence and analysing mutations — this may take up to 60 seconds...
-            </div>
-            {% if error %}
-            <div class="error-box">{{ error }}</div>
-            {% endif %}
-            {% if result %}
-            <div class="result-box {{ 'high-risk' if 'HIGH' in result else 'low-risk' }}">
-                <div class="result-title">{{ result }}</div>
-                <div class="confidence">
-                    Model confidence: {{ confidence }}%
-                    <span class="accuracy-note"> | Overall model accuracy: 73% (n=140 sequences)</span>
+        
+        <div class="content">
+            <!-- Input Form -->
+            <div class="input-section">
+                <form method="POST" action="/predict">
+                    <label>📝 Paste HBV Nucleotide Sequence:</label>
+                    <textarea name="sequence" rows="8" placeholder="Paste your HBV sequence here in FASTA or plain text format...&#10;&#10;Example:&#10;>HBV_sequence&#10;TTCCACTAGCATAGCTCCAAATCTTTATTATTCCTTCTCTGTCTGTGGCTAAGGA..." required></textarea>
+                    <button type="submit">🔍 Analyse Sequence</button>
+                </form>
+                
+                <div class="example-box">
+                    💡 <strong>Example Sequence Format:</strong>
+                    <code>TTCCACTAGCATAGCTCCAAATCTTTATTATTCCTTCTCTGTCTGTGGCTAAGGAAGAAGATCTAGCATAGCTCCAAATCTTTATTATTCCTTCTCTGTCTGTGGCTAAGGAAGAA</code>
+                    <p style="margin-top: 10px;">
                 </div>
-                <div class="genotype-label">Detected HBV Genotype</div>
-                <div class="genotype-badge">Genotype {{ genotype }}</div>
-                <table class="mutations-table">
+            </div>
+            
+            <!-- Error Message -->
+            {% if error %}
+            <div class="error-message">
+                <p>❌ {{ error }}</p>
+            </div>
+            {% endif %}
+            
+            <!-- Results Section -->
+            {% if result %}
+            <div class="results-section">
+                
+                
+                <!-- Risk Badge -->
+                <div class="risk-badge">
+                    {% if result.risk == 'HIGH RISK' %}
+                    <div class="risk-high">
+                        <h1 style="margin: 0;">⚠️ {{ result.risk }}</h1>
+                    </div>
+                    {% else %}
+                    <div class="risk-low">
+                        <h1 style="margin: 0;">✅ {{ result.risk }}</h1>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="confidence">
+                        <p><strong>Confidence:</strong> {{ result.confidence }}%</p>
+                    </div>
+                    
+                    <div class="genotype-badge">
+                        <strong>Detected Genotype:</strong> {{ result.genotype }}
+                    </div>
+                </div>
+                
+                <!-- Mutations Table -->
+                <h3>🧬 Mutations Detected (Used for Prediction)</h3>
+                <table>
                     <thead>
-                        <tr>
-                            <th>Mutation</th>
-                            <th>Region</th>
-                            <th>Status</th>
-                        </tr>
+                        <tr><th>Mutation</th><th>Status</th></tr>
                     </thead>
                     <tbody>
-                        <tr class="section-row"><td colspan="3">Mutations Used for Prediction</td></tr>
-                        {% for mutation, value in model_features.items() %}
+                        {% for mutation, status in result.mutations.items() %}
                         <tr>
-                            <td>{{ mutation }}</td>
-                            <td class="region-label">
-                                {% if mutation in ['A1762T', 'G1764A'] %}BCP
-                                {% elif mutation in ['G1896A', 'G1899A'] %}Precore
-                                {% elif mutation in ['C1653T', 'T1753V'] %}HBx
-                                {% elif mutation == 'PreS1' %}PreS1
-                                {% elif mutation == 'PreS2' %}PreS2
-                                {% endif %}
-                            </td>
-                            <td class="{{ 'present' if value == 1 else 'absent' }}">
-                                {{ 'Present' if value == 1 else 'Absent' }}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                        <tr class="section-row"><td colspan="3">Additional Informational Mutations</td></tr>
-                        {% for mutation, value in additional_features.items() %}
-                        <tr>
-                            <td>{{ mutation }}</td>
-                            <td class="region-label">
-                                {% if mutation == 'G1613A' %}Enhancer II
-                                {% elif mutation in ['C1766T', 'T1768A'] %}BCP
-                                {% endif %}
-                            </td>
-                            <td class="{{ 'present' if value == 1 else 'absent' }}">
-                                {{ 'Present' if value == 1 else 'Absent' }}
+                            <td><strong>{{ mutation }}</strong></td>
+                            <td class="{% if status == 'Present' %}status-present{% else %}status-absent{% endif %}">
+                                {{ status }}
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
+                
+                <!-- Additional Informational Mutations -->
+                <h3>📋 Additional Informational Mutations</h3>
+                <table>
+                    <thead>
+                        <tr><th>Mutation</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for mutation, status in result.additional_mutations.items() %}
+                        <tr>
+                            <td>{{ mutation }}</td>
+                            <td>{{ status }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                <!-- Synergy Analysis Section -->
+                {% if synergies and synergies|length > 0 %}
+                <div class="synergy-box">
+                    <h3>🔗 Synergistic Mutation Pairs Detected</h3>
+                    <p style="font-size: 14px;">These mutation combinations work together to increase HCC risk beyond what each mutation does alone:</p>
+                    <table>
+                        <thead>
+                            <tr><th>Mutation Pair</th><th>Extra Risk Above Additive</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for synergy in synergies %}
+                            <tr>
+                                <td><strong>{{ synergy.pair }}</strong></td>
+                                <td class="synergy-effect">+{{ synergy.extra_risk }}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <p class="note">
+                        📌 <em>Based on logistic regression analysis of 140 patient sequences (70 HCC, 70 non-HCC).</em>
+                    </p>
+                </div>
+                {% endif %}
+                
+                <!-- Note about classical mutations -->
+                <div style="margin-top: 20px; padding: 10px; background-color: #e3f2fd; border-radius: 5px; font-size: 12px;">
+                    <p style="margin: 0;">⚠️ <strong>Note:</strong> This tool detects <strong>HBV viral mutations</strong> associated with HCC risk. It does <strong>not</strong> detect classical host mutations (TP53, CTNNB1, FAT4) which require sequencing of human DNA from patient blood or tissue samples.</p>
+                </div>
             </div>
             {% endif %}
-            <p class="disclaimer">
-                This tool is intended for research purposes only and does not constitute clinical advice.
-                Results should be interpreted by a qualified medical professional.
-            </p>
+        </div>
+        
+        <div class="footer">
+            <p>HCC Prediction Tool | Random Forest Classifier | 8 Mutation Features | Trained on 140 HBV Sequences</p>
+            <p>For research purposes only. Not for clinical diagnosis.</p>
         </div>
     </div>
-    <script>
-        function showLoading() {
-            document.getElementById('loading').style.display = 'block';
-        }
-    </script>
 </body>
 </html>
-   
