@@ -1,0 +1,7 @@
+__pycache__
+*.pyc
+.git
+.gitignore
+*.xlsx
+*.fasta
+synergy_results.csv
