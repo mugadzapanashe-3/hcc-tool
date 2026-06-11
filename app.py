@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 from predict import predict_hcc_risk
 
+# Create the Flask app instance
 app = Flask(__name__)
 
 @app.route('/')
@@ -15,7 +16,7 @@ def predict():
     
     if not sequence or len(sequence) < 100:
         return render_template('index.html', 
-                             error="Please paste a valid HBV sequence",
+                             error="Please paste a valid HBV sequence (at least 100 nucleotides)",
                              result=None,
                              synergies=None)
     
@@ -33,11 +34,11 @@ def predict():
                              result=None,
                              synergies=None)
 
-# This handles people who type /predict directly in their browser
 @app.route('/predict', methods=['GET'])
 def predict_get():
     """Redirect GET requests to home page"""
     return redirect(url_for('home'))
 
+# For Hugging Face - must use port 7860
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=7860)
